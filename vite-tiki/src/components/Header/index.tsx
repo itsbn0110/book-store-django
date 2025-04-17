@@ -1,105 +1,195 @@
-import { useContext, useState, useRef, useEffect, useCallback, FC, ChangeEvent, KeyboardEvent } from 'react'
-import { useSelector } from 'react-redux'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChevronLeft, faBars, faSearch, faCartShopping } from '@fortawesome/free-solid-svg-icons'
-import Tippy from '@tippyjs/react/headless'
-import 'tippy.js/dist/tippy.css'
-import Fuse from 'fuse.js'
-import { Link } from 'react-router-dom'
-import classNames from 'classnames/bind'
+// Header.tsx
+import { useState, useRef, useEffect, useCallback, FC, ChangeEvent, KeyboardEvent } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronLeft, faBars, faSearch, faCartShopping } from '@fortawesome/free-solid-svg-icons';
+import Tippy from '@tippyjs/react/headless';
+import 'tippy.js/dist/tippy.css';
+import Fuse from 'fuse.js';
+import { Link } from 'react-router-dom';
+import classNames from 'classnames/bind';
 
-import styles from './Header.module.scss'
-import { BookContext } from '~/App'
-import images from '~/assets/images'
-import NavBar from '~/components/NavBar'
-import { RootState } from '~/redux/store'
+import styles from './Header.module.scss';
+import images from '~/assets/images';
+import NavBar from '~/components/NavBar';
+import AuthModal from '~/components/AuthModal';
+import { RootState } from '~/redux/store';
+import { clearUser } from '~/redux/userSlice';
+import { clearCart } from '~/redux/cartSlice';
 
-const cx = classNames.bind(styles)
+const cx = classNames.bind(styles);
+
+interface Author {
+  id: number;
+  name: string;
+  bio: string;
+}
+
+interface Publisher {
+  id: number;
+  name: string;
+  address: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+}
 
 interface Book {
-  id: number
-  name: string
-  price: number
-  thumbnail_url: string
-  rating_average: number
-  quantity_sold?: { text: string }
-  discount_rate: number
-  badges_new?: { icon: string | null; text: string }[]
+  id: number;
+  author_objs: Author[];
+  publisher_objs: Publisher[];
+  category_objs: Category[];
+  image: string;
+  title: string;
+  description: string;
+  price: string;
+  published_date: string;
+}
+
+// For search results display and compatibility with existing component
+interface BookDisplay {
+  id: number;
+  name: string;
+  price: number;
+  thumbnail_url: string;
+  rating_average: number;
+  quantity_sold?: { text: string };
+  discount_rate: number;
+  badges_new?: { icon: string | null; text: string }[];
 }
 
 const Header: FC = () => {
-  const books = useContext<Book[]>(BookContext)
-  const [searchValue, setSearchValue] = useState<string>('')
-  const [results, setResults] = useState<Book[]>(books)
-  const [showOverlay, setShowOverlay] = useState<boolean>(false)
-  const [isVisible, setIsVisible] = useState<boolean>(false)
-  const [selectedIndex, setSelectedIndex] = useState<number>(-1)
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
-  const totalQuantity = useSelector((state: RootState) => state.cart.totalQuantity)
+  const [books, setBooks] = useState<BookDisplay[]>([]);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [results, setResults] = useState<BookDisplay[]>([]);
+  const [showOverlay, setShowOverlay] = useState<boolean>(false);
+  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+  
+  const totalQuantity = useSelector((state: RootState) => state.cart.totalQuantity);
+  
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.user.user);
+  const isAuthenticated = !!user;
+
+  const handleLogout = () => {
+    dispatch(clearUser());
+    dispatch(clearCart());
+    localStorage.removeItem('persist:root'); 
+  };
+
+  // Fetch books from API
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://127.0.0.1:8000/api/books/');
+        const data = await response.json();
+        
+       
+        const transformedBooks = data.map((book: Book) => ({
+          id: book.id,
+          name: book.title,
+          price: parseFloat(book.price),
+          thumbnail_url: book.image,
+          rating_average: 5, 
+          discount_rate: 0, 
+        }));
+        setBooks(transformedBooks);
+      } catch (error) {
+        console.error('Error fetching books:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
 
   const fuseOptions = {
     keys: ['name'],
-    threshold: 0.3
-  }
+    threshold: 0.3,
+  };
 
-  const resultsRef = useRef<HTMLLIElement[]>([])
-  const inputRef = useRef<HTMLInputElement>(null)
-  const fuse = new Fuse(books, fuseOptions)
+  const fuse = new Fuse(books, fuseOptions);
+
+  const resultsRef = useRef<HTMLLIElement[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (selectedIndex !== -1 && resultsRef.current[selectedIndex]) {
-      resultsRef.current[selectedIndex].scrollIntoView({ block: 'nearest' })
+      resultsRef.current[selectedIndex].scrollIntoView({ block: 'nearest' });
     }
-  }, [selectedIndex])
+  }, [selectedIndex]);
 
   const handleChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    const searchValue = e.target.value
+    const searchValue = e.target.value;
+    setSearchValue(searchValue);
 
-    if (!searchValue.startsWith(' ')) {
-      setSearchValue(searchValue)
-      setIsVisible(true)
-    } else {
-      setIsVisible(false)
+    if (!searchValue.trim()) {
+      setResults([]);
+      setIsVisible(false);
+      return;
     }
 
-    const searchResults = fuse.search(searchValue).map(result => result.item)
-    setResults(searchResults)
-  }
+    const searchResults = fuse.search(searchValue).map(result => result.item);
+    setResults(searchResults);
+    setIsVisible(true);
+  };
 
   const handleHideResult = () => {
-    setResults([])
-    setIsVisible(false)
-  }
+    setResults([]);
+    setIsVisible(false);
+  };
 
   const handleFocus = () => {
-    setShowOverlay(true)
-    setResults(books)
-    setIsVisible(true)
-  }
+    setShowOverlay(true);
+    setIsVisible(true);
+  };
 
   const handleCloseSearch = () => {
-    setShowOverlay(false)
-  }
+    setShowOverlay(false);
+  };
 
   const handleClickSearchItem = () => {
-    setIsVisible(false)
-    setShowOverlay(false)
-  }
+    setIsVisible(false);
+    setShowOverlay(false);
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
-      setSelectedIndex(prevIndex => Math.min(prevIndex + 1, results.length - 1))
+      setSelectedIndex(prevIndex => Math.min(prevIndex + 1, results.length - 1));
     } else if (e.key === 'ArrowUp') {
-      setSelectedIndex(prevIndex => Math.max(prevIndex - 1, 0))
+      setSelectedIndex(prevIndex => Math.max(prevIndex - 1, 0));
     } else if (e.key === 'Enter' && selectedIndex !== -1 && results[selectedIndex]) {
-      console.log('Selected item:', results[selectedIndex].name)
+      console.log('Selected item:', results[selectedIndex].name);
     }
-  }
+  };
 
   const toggleMenu = useCallback(() => {
-    setIsMenuOpen(prevState => !prevState)
-    setShowOverlay(prevState => !prevState)
-  }, [])
+    setIsMenuOpen(prevState => !prevState);
+    setShowOverlay(prevState => !prevState);
+  }, []);
+
+  const handleAccountClick = useCallback(() => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+    }
+    // If authenticated, implement your account navigation logic here
+  }, [isAuthenticated]);
+
+  const closeAuthModal = useCallback(() => {
+    setShowAuthModal(false);
+  }, []);
+
+  if (loading) {
+    return <div className={cx('loading')}>Loading...</div>;
+  }
 
   return (
     <div>
@@ -114,22 +204,35 @@ const Header: FC = () => {
             </div>
 
             <Tippy
-              visible={isVisible}
-              offset={[0, 10]}
-              placement="bottom-start"
-              interactive
-              appendTo={() => document.body}
-              render={attrs => (
-                <ul className={cx('search-popper')} tabIndex={-1} {...attrs}>
+                visible={isVisible}
+                offset={[0, 10]}
+                placement="bottom-start"
+                interactive
+                appendTo={() => document.body}
+                popperOptions={{
+                  modifiers: [
+                    {
+                      name: 'sameWidth',
+                      enabled: true,
+                      fn: ({ state }) => {
+                        state.styles.popper.width = `${state.rects.reference.width}px`;
+                      },
+                      phase: 'beforeWrite',
+                      requires: ['computeStyles'],
+                    },
+                  ],
+                }}
+                render={attrs => (
+                  <ul className={cx('search-popper')} tabIndex={-1} {...attrs}>
                   {results.map((product, index) => (
                     <li
                       className={cx('search-result', { active: selectedIndex === index })}
                       key={product.id}
                       ref={el => {
-                        resultsRef.current[index] = el!;
+                        if (el) resultsRef.current[index] = el;
                       }}
                     >
-                      <Link to={`/bookdetail/${product.id}`} onClick={handleClickSearchItem}>
+                      <Link to={`/mypagebookdetail/${product.id}`} onClick={handleClickSearchItem}>
                         <img
                           width="35px"
                           className={cx('search-img')}
@@ -141,23 +244,23 @@ const Header: FC = () => {
                     </li>
                   ))}
                 </ul>
-              )}
-              onClickOutside={handleHideResult}
-            >
-              <div className={cx('search', 'd-lg-flex d-md-flex d-xl-flex d-xxl-flex')}>
-                <img src={images.search} alt="search" />
-                <input
-                  className={cx('search-input')}
-                  onChange={handleChangeSearch}
-                  onKeyDown={handleKeyDown}
-                  onFocus={handleFocus}
-                  placeholder="Giao hàng nhanh 2H & đúng khung giờ"
-                  value={searchValue}
-                  ref={inputRef}
-                />
-                <button className={cx('search-btn')}>Tìm kiếm</button>
-              </div>
-            </Tippy>
+                )}
+                onClickOutside={handleHideResult}
+              >
+                <div className={cx('search', 'd-lg-flex d-md-flex d-xl-flex d-xxl-flex')}>
+                  <img src={images.search} alt="search" />
+                  <input
+                    className={cx('search-input')}
+                    onChange={handleChangeSearch}
+                    onKeyDown={handleKeyDown}
+                    onFocus={handleFocus}
+                    placeholder="Giao hàng nhanh 2H & đúng khung giờ"
+                    value={searchValue}
+                    ref={inputRef}
+                  />
+                  <button className={cx('search-btn')}>Tìm kiếm</button>
+                </div>
+      </Tippy>
 
             <div className={cx('actions', 'd-md-none d-lg-flex d-xl-flex d-xxl-flex')}>
               <div className={cx('actions-wrapper')}>
@@ -170,33 +273,39 @@ const Header: FC = () => {
                   placement="bottom-end"
                   interactive
                   render={attrs => (
-                    <ul className={cx('account-popper')} tabIndex={-1} {...attrs}>
-                      <li>
-                        <Link className={cx('popper-link')} to="/account">
-                          Thông tin tài khoản
-                        </Link>
-                      </li>
-                      <li>
-                        <Link className={cx('popper-link')} to="/account">
-                          Đơn hàng của tôi
-                        </Link>
-                      </li>
-                      <li>
-                        <Link className={cx('popper-link')} to="/account">
-                          Trung tâm hỗ trợ
-                        </Link>
-                      </li>
-                      <li>
-                        <Link className={cx('popper-link')} to="/account">
-                          Đăng xuất
-                        </Link>
-                      </li>
-                    </ul>
+                    isAuthenticated ? (
+                      <ul className={cx('account-popper')} tabIndex={-1} {...attrs}>
+                        <li>
+                          <Link className={cx('popper-link')} to= {`/account/${user?.id}`}>
+                            Thông tin tài khoản
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className={cx('popper-link')} to="/account/orders">
+                            Đơn hàng của tôi
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className={cx('popper-link')} to="/support">
+                            Trung tâm hỗ trợ
+                          </Link>
+                        </li>
+                        <li className={cx('popper-link')}  onClick={handleLogout}>
+                            Đăng xuất
+                        </li>
+                      </ul>
+                    ) : null
                   )}
                 >
-                  <div className={cx('actions-btn')}>
-                    <img src={images.account} alt="home" />
-                    <span>Tài khoản</span>
+                  <div className={cx('actions-btn')} onClick={handleAccountClick}>
+                    <img src={images.account} alt="account" />
+                    <span>
+                      {isAuthenticated ? (
+                        user?.username || 'Tài khoản'
+                      ) : (
+                        'Tài khoản'
+                      )}
+                    </span>
                   </div>
                 </Tippy>
               </div>
@@ -210,6 +319,9 @@ const Header: FC = () => {
             </div>
 
             <div className={cx('actions-tablet-mini', 'd-xl-none d-md-flex d-lg-none d-xxl-none')}>
+              <div className={cx('account-btn-md')} onClick={handleAccountClick}>
+                <img src={images.account} alt="account" />
+              </div>
               <Link className={cx('cart-wrapper-md', 'd-md-flex d-lg-none')} to="/checkout/cart">
                 <span className="position-relative">
                   <img src={images.cart} alt="cart" />
@@ -249,10 +361,17 @@ const Header: FC = () => {
             <span className={cx('order-quantity')}>{totalQuantity}</span>
             <FontAwesomeIcon icon={faCartShopping} />
           </span>
+          
+          <span className={cx('account-mobile')} onClick={handleAccountClick}>
+            <FontAwesomeIcon icon={['far', 'user']} />
+          </span>
         </div>
       </div>
-    </div>
-  )
-}
 
-export default Header
+      {/* Auth Modal */}
+      <AuthModal isOpen={showAuthModal} onClose={closeAuthModal} />
+    </div>
+  );
+};
+
+export default Header;

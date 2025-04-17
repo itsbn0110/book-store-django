@@ -7,11 +7,13 @@ import MultiSelect from '~/pages/Admin/components/MultipleSelect'
 interface Author {
   id: string | number;
   name: string;
+  bio?: string;
 }
 
 interface Publisher {
   id: number;
   name: string;
+  address?: string;
 }
 
 interface Category {
@@ -55,6 +57,7 @@ const initialFormData: BookFormData = {
 const AddEditBookPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  console.log("iddddddddddddddddddd",id);
   const isEditMode = !!id;
   
   const [formData, setFormData] = useState<BookFormData>(initialFormData);
@@ -116,13 +119,18 @@ const AddEditBookPage = () => {
       
       const book = await response.json();
       
+      // Extract data from the new structure with *_objs arrays
+      const extractedAuthors = book.author_objs || [];
+      const extractedPublishers = book.publisher_objs || [];
+      const extractedCategories = book.category_objs || [];
+      
       setFormData({
         title: book.title,
         description: book.description,
         price: book.price,
-        authors: book.authors || [],
-        publishers: book.publishers || [],
-        categories: book.categories || [],
+        authors: extractedAuthors,
+        publishers: extractedPublishers,
+        categories: extractedCategories,
         published_date: book.published_date,
         image: null
       });
@@ -175,6 +183,7 @@ const AddEditBookPage = () => {
       }))
       setFormData(prev => ({...prev, categories: selectedCategories}))
   }
+  
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     
@@ -226,7 +235,7 @@ const AddEditBookPage = () => {
       errors.publishers = 'At least one publisher is required';
     }
     
-    if (formData.categories.length ===0) {
+    if (formData.categories.length === 0) {
       errors.categories = 'Category is required';
     }
     
@@ -253,7 +262,7 @@ const AddEditBookPage = () => {
       setIsSubmitting(true);
       
       const url = isEditMode 
-        ? `http://127.0.0.1:8000/api/books/${id}` 
+        ? `http://127.0.0.1:8000/api/books/${id}/update/` 
         : 'http://127.0.0.1:8000/api/books/create/';
       
       const method = isEditMode ? 'PUT' : 'POST';
@@ -272,7 +281,10 @@ const AddEditBookPage = () => {
       const publisherIds = formData.publishers.map(publisher => publisher.id);
       formDataToSubmit.append('publishers', JSON.stringify(publisherIds));
       
-      formDataToSubmit.append('categories', JSON.stringify(formData.categories.map(category => category.id)));
+      // Append categories as JSON array of IDs
+      const categoryIds = formData.categories.map(category => category.id);
+      formDataToSubmit.append('categories', JSON.stringify(categoryIds));
+      
       formDataToSubmit.append('published_date', formData.published_date);
 
       if (formData.image) {
@@ -282,7 +294,7 @@ const AddEditBookPage = () => {
       console.log(formDataToSubmit.get("image"));
       console.log(formDataToSubmit.get("authors"));  
       console.log(formDataToSubmit.get("publishers"));
-      console.log(formDataToSubmit.get("category"));
+      console.log(formDataToSubmit.get("categories"));
       
       const response = await fetch(url, {
         method,
@@ -401,14 +413,13 @@ const AddEditBookPage = () => {
               </div>
               
               <div className={styles.formGroup}>
-              <MultiSelect
+                <MultiSelect
                   label="Categories"
                   options={categories}
                   selectedValues={formData.categories}
                   onChange={handleCategoriesChange}
-                  placeholder="Select publishers..."
+                  placeholder="Select categories..."
                 />
-                
                 {formErrors.categories && <span className={styles.errorMessage}>{formErrors.categories}</span>}
               </div>
               

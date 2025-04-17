@@ -13,20 +13,33 @@ import * as productService from '~/services/productService'
 
 const cx = classNames.bind(styles)
 
-interface Book {
+interface Author {
   id: number
   name: string
-  price: number
-  thumbnail_url: string
-  rating_average: number
-  quantity_sold?: {
-    text: string
-  }
-  discount_rate: number
-  badges_new?: Array<{
-    icon: string | null
-    text: string
-  }>
+  bio: string
+}
+
+interface Publisher {
+  id: number
+  name: string
+  address: string
+}
+
+interface Category {
+  id: number
+  name: string
+}
+
+interface Book {
+  id: number
+  author_objs: Author[]
+  publisher_objs: Publisher[]
+  category_objs: Category[]
+  image: string
+  title: string
+  description: string
+  price: string
+  published_date: string
 }
 
 interface Supplier {
@@ -34,17 +47,27 @@ interface Supplier {
   name: string
 }
 
-interface HomeProps {
-  books: Book[]
-}
-
-const Home: React.FC<HomeProps> = ({ books }) => {
-  const [bookData, setCategoryBooks] = useState<Book[]>(books)
+const Home: React.FC = () => {
+  const [bookData, setBookData] = useState<Book[]>([])
   const [checked, setChecked] = useState<number | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    setCategoryBooks(books)
-  }, [books])
+    const fetchBooks = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('http://127.0.0.1:8000/api/books/')
+        const data = await response.json()
+        setBookData(data)
+      } catch (error) {
+        console.error('Error fetching books:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBooks()
+  }, [])
 
   const chunkArray = <T,>(arr: T[], chunkSize: number): T[][] => {
     const chunkedArray: T[][] = []
@@ -69,11 +92,44 @@ const Home: React.FC<HomeProps> = ({ books }) => {
     setChecked(supplierId)
     const result = await productService.supplier(supplierId)
     if (result && result.data) {
-      setCategoryBooks(result.data)
+      setBookData(
+        result.data.map((item: { 
+          id: number; 
+          thumbnail_url: string; 
+          name: string; 
+          price: number; 
+        }) => ({
+          id: item.id,
+          author_objs: [], // Provide default or adapt from `item`
+          publisher_objs: [], // Provide default or adapt from `item`
+          category_objs: [], // Provide default or adapt from `item`
+          image: item.thumbnail_url,
+          title: item.name,
+          description: '', // Provide default or adapt from `item`
+          price: item.price.toString(),
+          published_date: '', // Provide default or adapt from `item`
+        }))
+      )
     }
   }
 
-  console.log(bookData);
+  // Function to adapt API data structure to match the ProductCard component expectations
+  const adaptBookToProductCard = (book: Book, isMyPage: boolean) => {
+    return {
+      id: book.id,
+      name: book.title,
+      price: parseFloat(book.price),
+      thumbnail_url: book.image,
+      rating_average: 5, // Default rating since it's not in the API data
+      discount_rate: 0, // Default discount since it's not in the API data
+      isMyPage, // Pass the isMyPage flag to ProductCard
+    };
+  }
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
   return (
     <div className={cx('wrapper')}>
       <Header />
@@ -145,10 +201,10 @@ const Home: React.FC<HomeProps> = ({ books }) => {
             <div className="col-lg-10 d-md-none d-sm-none d-none d-lg-block">
               {productListPC.map((rowProduct, index) => (
                 <div className="row g-3 mb-3" key={index}>
-                  {rowProduct.map(result => (
-                    <div className="col-lg-2-4" key={result.id}>
+                  {rowProduct.map(book => (
+                    <div className="col-lg-2-4 px-1" key={book.id}>
                       <div className={cx('product-card')}>
-                        <ProductCard data={result} />
+                        <ProductCard data={adaptBookToProductCard(book, true)} />
                       </div>
                     </div>
                   ))}
@@ -159,10 +215,10 @@ const Home: React.FC<HomeProps> = ({ books }) => {
             <div className="col-md-12 d-none d-lg-none d-sm-none d-md-block">
               {productListTablet.map((rowProduct, index) => (
                 <div className="row g-3 mb-3" key={index}>
-                  {rowProduct.map(result => (
-                    <div className="col-md-4" key={result.id}>
+                  {rowProduct.map(book => (
+                    <div className="col-md-4" key={book.id}>
                       <div className={cx('product-card')}>
-                        <ProductCard data={result} />
+                        <ProductCard data={adaptBookToProductCard(book, true)} />
                       </div>
                     </div>
                   ))}
@@ -172,10 +228,10 @@ const Home: React.FC<HomeProps> = ({ books }) => {
             {/* Mobile */}
             <div className="col-sm-12 col-12 d-block d-sm-block d-md-none d-lg-none">
               <div className="row g-3 mb-3">
-                {bookData.map(result => (
-                  <div className="col-sm-6 col-6" key={result.id}>
+                {bookData.map(book => (
+                  <div className="col-sm-6 col-6" key={book.id}>
                     <div className={cx('product-card')}>
-                      <ProductCard data={result} />
+                      <ProductCard data={adaptBookToProductCard(book, true)} />
                     </div>
                   </div>
                 ))}

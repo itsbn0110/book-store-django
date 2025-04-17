@@ -121,14 +121,14 @@ const CategoryPage: React.FC = () => {
                   {suppliersMockData.map(supplier => (
                     <div className="form-check" key={supplier.id}>
                       <input
-                        className="form-check-input"
+                        className={cx("form-check-input")}
                         type="checkbox"
                         value={supplier.name}
                         id={supplier.id.toString()}
                         checked={checked === supplier.id}
                         onChange={() => handleSelectedChange(supplier.id)}
                       />
-                      <label className="form-check-label" htmlFor={supplier.id.toString()}>
+                      <label className={cx("form-check-label")} htmlFor={supplier.id.toString()}>
                         {supplier.name}
                       </label>
                     </div>
@@ -165,7 +165,7 @@ const CategoryPage: React.FC = () => {
               {productListPC.map((rowProduct, index) => (
                 <div className="row g-3 mb-3" key={index}>
                   {rowProduct.map(result => (
-                    <div className="col-lg-2-4" key={result.id}>
+                    <div className="col-lg-2-4 px-1" key={result.id}>
                       <div className={cx('product-card')}>
                         <ProductCard data={result} />
                       </div>

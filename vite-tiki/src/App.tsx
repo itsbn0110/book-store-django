@@ -1,13 +1,23 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useState, createContext } from 'react';
+import { useSelector } from 'react-redux';
 import * as productService from '~/services/productService';
 import { publicRoutes, privateRoutes } from '~/routes';
 import GlobalStyles from '~/components/GlobalStyles';
 import { ProductResponse } from './types/types';
-import AdminLayout from './pages/Admin/AdminLayout'
+import AdminLayout from './pages/Admin/AdminLayout';
+import { RootState } from '~/redux/store';
 
 // Create context for product data if needed
 export const BookContext = createContext<ProductResponse['data']>([]);
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const user = useSelector((state: RootState) => state.user.user);
+  if (!user || user.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
 
 function App() {
   const [productResult, setProductResult] = useState<ProductResponse['data']>([]);
@@ -34,7 +44,7 @@ function App() {
             );
           })}
 
-          {/* Admin routes - wrapped with AdminLayout */}
+          {/* Admin routes - wrapped with AdminLayout and ProtectedRoute */}
           {privateRoutes.map((route, index) => {
             const Page = route.component;
             return (
@@ -42,9 +52,11 @@ function App() {
                 key={index}
                 path={route.path}
                 element={
-                  <AdminLayout>
-                    <Page books={route.books ? productResult : undefined} />
-                  </AdminLayout>
+                  <ProtectedRoute>
+                    <AdminLayout>
+                      <Page books={route.books ? productResult : undefined} />
+                    </AdminLayout>
+                  </ProtectedRoute>
                 }
               />
             );

@@ -15,13 +15,14 @@ interface CartItem {
   name: string
   price: number
   quantity: number
-  image: string
+  image?: string
   checked: boolean
   authIcon?: Array<{
     icon: string
     icon_width: number
     icon_height: number
   }>
+  thumbnail_url: string
   badgesNew_v2?: {
     text: string
   }
@@ -29,6 +30,7 @@ interface CartItem {
 
 const Cart: React.FC = () => {
   const bookItems = useSelector((state: RootState) => state.cart.items)
+  console.log("bookItems", bookItems);
   const totalQuantity = useSelector((state: RootState) => state.cart.totalQuantity)
   const [products, setProducts] = useState<CartItem[]>(
     bookItems.map(product => ({ ...product, checked: false }))
@@ -154,7 +156,7 @@ const Cart: React.FC = () => {
                               checked={item.checked}
                               onChange={() => handleSelectItem(item.id)}
                             />
-                            <img src={item.image} alt="book" className={cx('book-image')} />
+                            <img src={item.thumbnail_url} alt="book" className={cx('book-image')} />
                             <div className={cx('body')}>
                               {item.authIcon &&
                                 item.authIcon.map(auth => (

@@ -1,6 +1,7 @@
 // AdminLayout.tsx
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { 
   LayoutDashboard, 
   Book, 
@@ -20,7 +21,7 @@ import {
 } from 'lucide-react';
 import classNames from 'classnames/bind';
 import styles from './AdminLayout.module.scss';
-
+import { RootState } from '~/redux/store';
 const cx = classNames.bind(styles);
 
 interface AdminLayoutProps {
@@ -33,6 +34,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const location = useLocation();
   const currentPath = location.pathname;
 
+  const user = useSelector((state: RootState) => state.user.user);
   const toggleBooksSection = () => {
     setBooksSectionOpen(!booksSectionOpen);
   };
@@ -190,7 +192,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 <Bell size={20} />
               </a>
               <div className={cx('user-avatar')}>
-                <img src="/api/placeholder/32/32" alt="User avatar" />
+                <img src={user?.avatar} alt="User avatar" />
               </div>
             </div>
           </div>

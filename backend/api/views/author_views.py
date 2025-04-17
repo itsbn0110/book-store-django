@@ -21,7 +21,6 @@ def get_author_by_id(request, author_id):
         return Response({"error": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
-@permission_classes([IsAdmin])
 def create_author(request):
     serializer = AuthorSerializer(data=request.data)
     if serializer.is_valid():

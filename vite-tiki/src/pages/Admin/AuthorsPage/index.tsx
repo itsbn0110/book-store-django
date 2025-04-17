@@ -96,7 +96,7 @@ const AuthorsPage = () => {
       setIsSubmitting(true);
       
       const url = currentAuthorId 
-        ? `http://127.0.0.1:8000/api/authors/${currentAuthorId}` 
+        ? `http://127.0.0.1:8000/api/authors/${currentAuthorId}/update/` 
         : 'http://127.0.0.1:8000/api/authors/create/';
       
       const method = currentAuthorId ? 'PUT' : 'POST';
@@ -126,7 +126,7 @@ const AuthorsPage = () => {
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this author?')) {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/authors/${id}`, {
+        const response = await fetch(`http://127.0.0.1:8000/api/authors/${id}/delete/`, {
           method: 'DELETE',
         });
         

@@ -19,6 +19,7 @@ const images: Images = {
   search: new URL('./search-icon.png', import.meta.url).href,
   cart: new URL('./cart-icon.png', import.meta.url).href,
   searchItem: new URL('./searchitem.png', import.meta.url).href,
+  tikiLogin : new URL('./tiki_login.png', import.meta.url).href,
 } 
 
 export default images

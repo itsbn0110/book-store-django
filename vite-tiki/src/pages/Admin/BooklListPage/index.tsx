@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react';
 import { PlusCircle, Pencil, Trash2, Search, X, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import styles from '../AdminPages.module.scss';
+
 interface Author {
   id: number;
   name: string;
+  bio?: string;
 }
 
 interface Publisher {
   id: number;
   name: string;
+  address?: string;
 }
 
 interface Category {
@@ -22,9 +25,9 @@ interface Book {
   title: string;
   description: string;
   price: string;
-  author: Author;
-  publisher: Publisher;
-  category: Category;
+  author_objs: Author[];
+  publisher_objs: Publisher[];
+  category_objs: Category[];
   published_date: string;
   image: string;
 }
@@ -57,11 +60,9 @@ const BookListPage = () => {
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this book?')) {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/books/${id}`, {
+        const response = await fetch(`http://127.0.0.1:8000/api/books/${id}/delete/`, {
           method: 'DELETE',
-          headers: {
-            'Authorization': 'Bearer <access_token_admin>',
-          },
+         
         });
         
         if (!response.ok) {
@@ -88,11 +89,35 @@ const BookListPage = () => {
     setSelectedBook(null);
   };
 
-  const filteredBooks = books.filter(book =>
-    book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.author.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.publisher.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const getMainAuthor = (book: Book) => {
+    return book.author_objs && book.author_objs.length > 0 
+      ? book.author_objs[0].name 
+      : 'Unknown Author';
+  };
+
+  const getMainPublisher = (book: Book) => {
+    return book.publisher_objs && book.publisher_objs.length > 0 
+      ? book.publisher_objs[0].name 
+      : 'Unknown Publisher';
+  };
+
+  const getMainCategory = (book: Book) => {
+    return book.category_objs && book.category_objs.length > 0 
+      ? book.category_objs[0].name 
+      : 'Uncategorized';
+  };
+
+  const filteredBooks = books.filter(book => {
+    const titleMatch = book.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const authorMatch = book.author_objs?.some(author => 
+      author.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const publisherMatch = book.publisher_objs?.some(publisher => 
+      publisher.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    return titleMatch || authorMatch || publisherMatch;
+  });
 
   const formatPrice = (price: string) => {
     return parseFloat(price).toLocaleString('en-US', {
@@ -156,9 +181,9 @@ const BookListPage = () => {
                         />
                       </td>
                       <td>{book.title}</td>
-                      <td>{book.author.name}</td>
-                      <td>{book.publisher.name}</td>
-                      <td>{book.category.name}</td>
+                      <td>{getMainAuthor(book)}</td>
+                      <td>{getMainPublisher(book)}</td>
+                      <td>{getMainCategory(book)}</td>
                       <td>{formatPrice(book.price)}</td>
                       <td>{book.published_date}</td>
                       <td className={styles.actionsCell}>
@@ -222,15 +247,25 @@ const BookListPage = () => {
                 </div>
                 <div className={styles.bookPreviewDetails}>
                   <h3 className={styles.bookTitle}>{selectedBook.title}</h3>
-                  <p className={styles.bookAuthor}>
-                    By <strong>{selectedBook.author.name}</strong>
-                  </p>
-                  <p className={styles.bookPublisher}>
-                    Publisher: <span>{selectedBook.publisher.name}</span>
-                  </p>
-                  <p className={styles.bookCategory}>
-                    Category: <span>{selectedBook.category.name}</span>
-                  </p>
+                  
+                  {selectedBook.author_objs && selectedBook.author_objs.length > 0 && (
+                    <p className={styles.bookAuthor}>
+                      By <strong>{selectedBook.author_objs.map(author => author.name).join(', ')}</strong>
+                    </p>
+                  )}
+                  
+                  {selectedBook.publisher_objs && selectedBook.publisher_objs.length > 0 && (
+                    <p className={styles.bookPublisher}>
+                      Publisher: <span>{selectedBook.publisher_objs.map(pub => pub.name).join(', ')}</span>
+                    </p>
+                  )}
+                  
+                  {selectedBook.category_objs && selectedBook.category_objs.length > 0 && (
+                    <p className={styles.bookCategory}>
+                      Category: <span>{selectedBook.category_objs.map(cat => cat.name).join(', ')}</span>
+                    </p>
+                  )}
+                  
                   <p className={styles.bookPrice}>
                     Price: <span>{formatPrice(selectedBook.price)}</span>
                   </p>

@@ -73,18 +73,20 @@
 }
 
 .search-popper {
+    position: absolute;
     border-radius: 6px;
     top: 100%;
-    list-style: none; /* Xóa dấu chấm cho các mục */
+    list-style: none;
     padding: 0;
     margin: 0;
-    background-color: #fff; /* Màu nền */
-    box-shadow: rgba(0, 0, 0, 0.28) 0px 6px 12px 0px; /* Đổ bóng */
-    max-height: 280px; /* Chiều cao tối đa */
-    overflow-y: auto; /* Hiển thị thanh cuộn khi có quá nhiều kết quả */
-    z-index: 1000; /* Đảm bảo nó nằm trên các phần tử khác */
-    box-sizing: border-box; /* Bao gồm padding và border trong chiều rộng */
-
+    background-color: #fff;
+    box-shadow: rgba(0, 0, 0, 0.28) 0px 6px 12px 0px;
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-sizing: border-box;
+    width: 100%; /* Thêm thuộc tính này để đảm bảo chiều rộng 100% */
+    left: 0; /* Đảm bảo nó bắt đầu từ lề trái của phần tử cha */
     li:hover {
         background-color: rgba(39, 39, 42, 0.12);
     }

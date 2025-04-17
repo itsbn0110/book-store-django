@@ -126,7 +126,7 @@ const PublishersPage = () => {
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this publisher?')) {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/publishers/${id}/delete`, {
+        const response = await fetch(`http://127.0.0.1:8000/api/publishers/${id}/delete/`, {
           method: 'DELETE',
         });
         

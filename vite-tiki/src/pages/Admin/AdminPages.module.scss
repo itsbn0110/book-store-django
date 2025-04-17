@@ -92,7 +92,7 @@
     
     th, td {
       padding: 0.75rem 1rem;
-      text-align: left;
+      text-align: center;
       border-bottom: 1px solid #e5e7eb;
     }
     
@@ -106,6 +106,7 @@
     td {
       font-size: 1.5rem;
       color: #4b5563;
+      
     }
     
     tbody tr:hover {
@@ -115,10 +116,13 @@
   
   .actionsCell {
     display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
     gap: 0.75rem;
-    font-size:1.5rem;
-    
-    .editButton, .deleteButton {
+    font-size: 1.5rem;
+    margin-top: 0; /* Remove margin to align properly */
+
+    .editButton, .deleteButton, .viewButton {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -129,17 +133,24 @@
       background: none;
       cursor: pointer;
       transition: background-color 0.2s;
+
       &:hover {
         background-color: #f3f4f6;
       }
     }
-    
+
     .editButton {
       color: #3b82f6;
     }
-    
+
     .deleteButton {
       color: #ef4444;
+    }
+
+    .viewButton {
+      color: #24e81d;
+      border: none;
+      background-color: #fff;
     }
   }
   
@@ -439,4 +450,15 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.bookThumbnail{
+  width:80px;
+  height: 80px;
+  object-fit: cover;
+  border:1px solid #e3dc18;
+}
+
+.viewButton {
+
 }

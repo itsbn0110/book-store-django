@@ -9,11 +9,16 @@ import AuthorsPage from '~/pages/Admin/AuthorsPage';
 import PublishersPage from '~/pages/Admin/PublisherPage';
 import CategoriesPage from '~/pages/Admin/CategoriesPage';
 import BookListPage from '~/pages/Admin/BooklListPage';
+import MyPageBookDetail from '~/pages/MyPageBookDetail';
+import AccountInfo from '~/components/AccountInfo';
 const publicRoutes: RouteConfig[] = [
   { path: '/', component: HomeBook, books: true },
   { path: '/bookdetail/:id', component: BookDetails, books: true },
+  { path: '/mypagebookdetail/:id', component: MyPageBookDetail, books: true },
+
   { path: '/checkout/cart', component: Cart },
   { path: '/category/:categoryName', component: CategoryPage, books: true },
+  { path: '/account/:id', component: AccountInfo },
 ];
 
 const privateRoutes: RouteConfig[] = [
@@ -28,6 +33,10 @@ const privateRoutes: RouteConfig[] = [
   },
   {
     path: "/admin/books/add",
+    component: AddBookPage,
+  },
+  {
+    path: "/admin/books/edit/:id",
     component: AddBookPage,
   },
   {

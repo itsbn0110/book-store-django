@@ -3,7 +3,6 @@ from rest_framework import serializers
 from ..models.user import CustomUser as User
 import cloudinary
 
-# Debugging Cloudinary configuration
 print("Cloudinary Config:", cloudinary.config().cloud_name, cloudinary.config().api_key, cloudinary.config().api_secret)
 
 class UserSerializer(serializers.ModelSerializer):
