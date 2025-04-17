@@ -1,0 +1,123 @@
+@import 'normalize.css';
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary: #0a68ff;
+    --text-color: #222;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.6rem;
+    line-height: 1.5;
+    text-rendering: optimizeSpeed;
+    background-color: #f5f5fa;
+    overflow: overlay;
+}
+
+input,
+button,
+[tabindex] {
+    outline: none;
+}
+
+a[href] {
+    text-decoration: none;
+}
+
+p.h1 {
+    font-size: 1.2rem;
+}
+@media (min-width: 992px) {
+    .col-lg-2-4 {
+        flex: 0 0 20%;
+        width: 20%;
+    }
+}
+@media (min-width: 1300px) and (max-width: 1440px) {
+    .custom-container-xxl {
+        max-width: 1280px !important;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .custom-container-xxl {
+        max-width: 960px !important;
+    }
+}
+.form-check-input {
+    width: 14px;
+    height: 14px;
+    margin-top: 6px;
+}
+.form-check-label {
+    font-size: 12px;
+}
+
+.custom-container-xxl {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.custom-container-xl {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+// lớp overlay
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+}
+
+.overlay.show {
+    display: block;
+}
+
+//  navbar mobile
+.navbar {
+    padding: 0.5rem 1rem;
+}
+.navbar-toggler {
+    border: none;
+}
+.navbar-toggler-icon {
+    background-image: none;
+    font-size: 24px;
+    color: #007bff;
+}
+.navbar-nav {
+    margin-top: 10px;
+}
+/* Style to ensure dropdown covers the screen width */
+
+// custom body scroolbar
+html ::-webkit-scrollbar {
+    border-radius: 0px;
+    width: 14px;
+}
+
+html ::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(21, 22, 24, 0.2);
+}
+
+html ::-webkit-scrollbar-track {
+    border-radius: 0px;
+    background-color: rgba(21, 22, 24, 0.08);
+}
+
+// custom toast message

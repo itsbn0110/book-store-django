@@ -1,0 +1,53 @@
+.wrapper {
+    margin-top: 66px;
+    background-color: #fff;
+    .title {
+        font-size: 1.6rem;
+        font-weight: 500;
+        line-height: 2.4;
+        color: #38383d;
+    }
+
+    .list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        .link {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #808089;
+        }
+    }
+}
+
+.certification {
+    display: flex;
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+.social {
+    display: flex;
+    gap: 8px;
+}
+
+.mobile {
+    display: flex;
+    gap: 6px;
+}
+
+.Apps {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.section {
+    border-bottom: 1px solid #ebebf0;
+    padding-bottom: 20px;
+}
+
+.about-company {
+    margin-top: 20px;
+}

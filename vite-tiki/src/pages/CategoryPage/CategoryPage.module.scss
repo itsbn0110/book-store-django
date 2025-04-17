@@ -1,0 +1,59 @@
+.wrapper {
+    min-height: 100vh;
+}
+
+.content {
+    margin-top: 20px;
+    padding: 0 0 24px;
+}
+
+.filter {
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    &-text {
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 24px;
+    gap: 4px;
+
+    &-item {
+        margin: 0 2px;
+
+        &-link {
+            min-width: 40px;
+            height: 30px;
+            padding: 0px 12px;
+            border: 1px solid rgb(236, 236, 236);
+            background-color: rgb(255, 255, 255);
+            border-radius: 4px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+
+            &:hover {
+                border-color: var(--primary);
+                color: var(--primary);
+            }
+
+            &.active {
+                background-color: var(--primary);
+                border-color: var(--primary);
+                color: #fff;
+            }
+        }
+    }
+}

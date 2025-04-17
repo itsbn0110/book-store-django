@@ -1,0 +1,79 @@
+.addEditBookPage {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  
+  h1 {
+    margin-bottom: 24px;
+    font-size: 24px;
+  }
+  
+  .formGroup {
+    margin-bottom: 20px;
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    input, textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+      
+      &:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+    }
+    
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+  }
+  
+  .formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 32px;
+    
+    button {
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      
+      &.cancelButton {
+        background-color: #f8f9fa;
+        border: 1px solid #d3d3d3;
+        
+        &:hover {
+          background-color: #e9ecef;
+        }
+      }
+      
+      &.saveButton {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        
+        &:hover {
+          background-color: #0069d9;
+        }
+      }
+    }
+  }
+  
+  .loading {
+    text-align: center;
+    padding: 40px;
+    font-size: 18px;
+    color: #666;
+  }
+}

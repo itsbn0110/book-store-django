@@ -1,0 +1,20 @@
+.wrapper {
+    display: inline-flex;
+    gap: 2px;
+
+    &.small {
+        font-size: 12px;
+    }
+
+    &.large {
+        font-size: 20px;
+    }
+}
+
+.star-gold {
+    color: rgb(253, 216, 54);
+}
+
+.star-normal {
+    color: rgb(224, 224, 224);
+}
